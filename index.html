@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="CrossHand — An immersive anti-gravity illusion powered by real-time hand tracking. Cross your hands to bend gravity.">
+    <title>CrossHand — Anti-Gravity Illusion</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ================================ -->
+    <!-- Loading Screen                   -->
+    <!-- ================================ -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader-ring">
+            <div class="loader-core"></div>
+        </div>
+        <h1 class="loader-title">CrossHand</h1>
+        <p class="loader-status" id="loading-status">Initializing experience…</p>
+    </div>
+
+    <!-- ================================ -->
+    <!-- Immersive Stage                  -->
+    <!-- ================================ -->
+    <div id="stage" class="stage" style="display:none;">
+        <video id="webcam" autoplay playsinline muted></video>
+        <canvas id="space-canvas" aria-hidden="true"></canvas>
+        <canvas id="fx-canvas"></canvas>
+    </div>
+
+    <!-- Vignette Overlay -->
+    <div id="vignette" class="vignette" style="display:none;"></div>
+
+    <!-- Energy Border (on crossing) -->
+    <div id="energy-border" class="energy-border"></div>
+
+    <!-- ================================ -->
+    <!-- HUD (Heads-Up Display)           -->
+    <!-- ================================ -->
+    <div id="hud" class="hud" style="display:none;">
+        
+        <!-- Top-left: App title -->
+        <div class="hud-title">
+            <div class="hud-logo" id="hud-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="url(#hud-logo-grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                    <defs>
+                        <linearGradient id="hud-logo-grad" x1="2" y1="2" x2="22" y2="22">
+                            <stop stop-color="#6366f1"/>
+                            <stop offset="0.5" stop-color="#7c3aed"/>
+                            <stop offset="1" stop-color="#a78bfa"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <div class="hud-app-name"><span>Cross</span>Hand</div>
+        </div>
+
+        <!-- Top-right: Status pills -->
+        <div class="hud-status">
+            <div class="hud-pill" id="fps-pill">
+                <span class="label">FPS</span>
+                <span class="value" id="fps-value">—</span>
+            </div>
+            <div class="hud-pill" id="hands-pill">
+                <span class="label">Hands</span>
+                <span class="value" id="hands-value">0</span>
+            </div>
+            <div class="hud-cross-badge" id="cross-badge">
+                <span class="indicator"></span>
+                <span id="cross-label">Standby</span>
+            </div>
+        </div>
+
+        <!-- Left side: Celestial Object Picker -->
+        <div class="planet-picker" id="planet-picker">
+            <div class="picker-label">Hold Object</div>
+            <div class="picker-grid">
+                <button class="planet-btn active" data-planet="none" title="None">
+                    <span class="planet-icon">✕</span>
+                    <span class="planet-name">None</span>
+                </button>
+                <button class="planet-btn" data-planet="sun" title="Sun">
+                    <span class="planet-icon">☀️</span>
+                    <span class="planet-name">Sun</span>
+                </button>
+                <button class="planet-btn" data-planet="moon" title="Moon">
+                    <span class="planet-icon">🌙</span>
+                    <span class="planet-name">Moon</span>
+                </button>
+                <button class="planet-btn" data-planet="earth" title="Earth">
+                    <span class="planet-icon">🌍</span>
+                    <span class="planet-name">Earth</span>
+                </button>
+                <button class="planet-btn" data-planet="mars" title="Mars">
+                    <span class="planet-icon">🔴</span>
+                    <span class="planet-name">Mars</span>
+                </button>
+                <button class="planet-btn" data-planet="jupiter" title="Jupiter">
+                    <span class="planet-icon">🟠</span>
+                    <span class="planet-name">Jupiter</span>
+                </button>
+                <button class="planet-btn" data-planet="saturn" title="Saturn">
+                    <span class="planet-icon">🪐</span>
+                    <span class="planet-name">Saturn</span>
+                </button>
+                <button class="planet-btn" data-planet="uranus" title="Uranus">
+                    <span class="planet-icon">🩵</span>
+                    <span class="planet-name">Uranus</span>
+                </button>
+                <button class="planet-btn" data-planet="neptune" title="Neptune">
+                    <span class="planet-icon">🔵</span>
+                    <span class="planet-name">Neptune</span>
+                </button>
+                <button class="planet-btn" data-planet="galaxy" title="Galaxy">
+                    <span class="planet-icon">🌌</span>
+                    <span class="planet-name">Galaxy</span>
+                </button>
+                <button class="planet-btn" data-planet="meteors" title="Meteors">
+                    <span class="planet-icon">☄️</span>
+                    <span class="planet-name">Meteors</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right side: Celestial data panel -->
+        <aside class="info-panel" id="info-panel" style="display:none;">
+            <div class="info-panel-header">
+                <div class="kicker">Celestial Data</div>
+                <div class="title" id="info-title">—</div>
+                <div class="subtitle" id="info-subtitle">Select a body to see details</div>
+            </div>
+
+            <div class="info-grid" id="info-grid">
+                <div class="row"><div class="k">Type</div><div class="v" id="info-type">—</div></div>
+                <div class="row"><div class="k">Radius</div><div class="v" id="info-radius">—</div></div>
+                <div class="row"><div class="k">Surface area</div><div class="v" id="info-area">—</div></div>
+                <div class="row"><div class="k">Atmosphere / gas</div><div class="v" id="info-gas">—</div></div>
+                <div class="row"><div class="k">Distance from Earth</div><div class="v" id="info-distance">—</div></div>
+                <div class="row"><div class="k">Color</div><div class="v" id="info-color">—</div></div>
+            </div>
+
+            <div class="info-desc" id="info-desc">—</div>
+        </aside>
+
+        <!-- Bottom center: Instruction -->
+        <div class="hud-prompt" id="hud-prompt">
+            <span class="icon">🤲</span>
+            <span>Choose a body on the left — one hand: pinch to resize, tilt to rotate · two hands: spread to resize, turn wrists to rotate</span>
+        </div>
+
+        <!-- Bottom-left: Technical info -->
+        <div class="hud-info">
+            <div class="hud-info-line" id="info-resolution">—</div>
+            <div class="hud-info-line">MediaPipe Hand Landmarker v0.10.18</div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
