@@ -101,6 +101,77 @@ body {
 }
 
 /* ================================================
+   Site Banner
+   ================================================ */
+.site-banner-wrap {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9500;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(92vw, 980px);
+}
+
+.site-banner {
+    max-width: min(92vw, 880px);
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(8, 8, 14, 0.42);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55), 0 0 40px rgba(124, 58, 237, 0.12);
+}
+
+.site-banner-logo {
+    flex: 0 0 auto;
+    width: 336px;
+    height: 336px;
+    animation: sidhooz-fly 4.2s var(--ease-spring) infinite;
+    will-change: transform;
+}
+
+.site-banner-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 14px rgba(124, 58, 237, 0.22));
+    opacity: 0.95;
+}
+
+@keyframes sidhooz-fly {
+    0%   { transform: translate3d(0, 0, 0) rotate(-2deg); }
+    35%  { transform: translate3d(6px, -10px, 0) rotate(2deg); }
+    70%  { transform: translate3d(-4px, -4px, 0) rotate(-1deg); }
+    100% { transform: translate3d(0, 0, 0) rotate(-2deg); }
+}
+
+.site-banner-title {
+    font-size: clamp(0.92rem, 1.2vw + 0.65rem, 1.15rem);
+    font-weight: 850;
+    letter-spacing: -0.02em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: linear-gradient(135deg, #e8e8f0 0%, #a78bfa 35%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(124, 58, 237, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .site-banner-logo {
+        animation: none;
+    }
+}
+
+/* ================================================
    Film Grain Overlay (very subtle)
    ================================================ */
 body::after {
@@ -672,6 +743,26 @@ body::after {
    Responsive
    ================================================ */
 @media (max-width: 768px) {
+    .site-banner-wrap {
+        top: max(10px, env(safe-area-inset-top));
+        gap: 8px;
+        max-width: 92vw;
+    }
+
+    .site-banner {
+        padding: 8px 12px;
+        max-width: 92vw;
+    }
+
+    .site-banner-title {
+        font-size: clamp(0.86rem, 2.8vw, 0.98rem);
+    }
+
+    .site-banner-logo {
+        width: clamp(220px, 44vw, 280px);
+        height: clamp(220px, 44vw, 280px);
+    }
+
     .hud-title {
         top: 16px;
         left: 16px;
@@ -745,6 +836,13 @@ body::after {
 
     .info-panel {
         display: none !important;
+    }
+}
+
+/* Tight landscape phones: keep UI from feeling cramped */
+@media (max-height: 420px) and (orientation: landscape) {
+    .site-banner-wrap {
+        display: none;
     }
 }
 
